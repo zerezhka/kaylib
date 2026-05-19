@@ -17,6 +17,7 @@ import org.bljw.kaylib.drawText
 import org.bljw.kaylib.input.InputActionId
 import org.bljw.kaylib.input.InputBinding
 import org.bljw.kaylib.input.InputSystem
+import org.bljw.kaylib.input.RebindingController
 import org.bljw.kaylib.input.RaylibInputSource
 import org.bljw.kaylib.measureText
 import org.bljw.kaylib.screenHeight
@@ -25,11 +26,9 @@ import org.bljw.kaylib.ui.ClickableRow
 
 class SettingsScreen(
     private val input: InputSystem,
-    private val inputSource: RaylibInputSource,
+    inputSource: RaylibInputSource,
 ) : Screen {
-    private var rebindingAction: InputActionId? = null
-    private var releaseBeforeCapture: InputActionId? = null
-    private var canCapture = false
+    private val rebinding = RebindingController(inputSource)
 
     private val remappableActions = listOf(
         MoveUpAction,
@@ -42,31 +41,24 @@ class SettingsScreen(
 
     override fun update(input: InputSystem): AppScreen? {
         if (input.wasPressed(CancelAction)) {
-            if (rebindingAction != null) {
-                stopRebinding()
+            if (rebinding.activeAction != null) {
+                rebinding.cancel()
                 return null
             }
             return AppScreen.MainMenu
         }
 
-        val layout = layout()
+        rebinding.update(input)?.let { (action, control) ->
+            input.replaceBinding(id = action, binding = InputBinding(control))
+        }
 
-        if (rebindingAction == null) {
+        if (rebinding.activeAction == null) {
+            val layout = layout()
             for ((action, y) in layout.actionRows) {
                 if (ClickableRow.isClicked(layout.label(action), UiTheme.TextX, y)) {
-                    startRebinding(action)
+                    rebinding.start(action)
                     break
                 }
-            }
-        } else {
-            val action = rebindingAction!!
-            if (canCapture) {
-                inputSource.captureNextControl()?.let { control ->
-                    input.replaceBinding(id = action, binding = InputBinding(control))
-                    stopRebinding()
-                }
-            } else if (releaseBeforeCapture != null && !input.isDown(releaseBeforeCapture!!)) {
-                canCapture = true
             }
         }
 
@@ -83,13 +75,11 @@ class SettingsScreen(
         drawText("Controls", UiTheme.TextX, layout.controlsHeaderY, UiTheme.TextFontSize, UiTheme.hintColor())
 
         for ((action, y) in layout.actionRows) {
-            val label = layout.label(action)
-            val highlighted = rebindingAction == action
-            drawRow(label, y, highlighted)
+            drawRow(layout.label(action), y, highlighted = rebinding.activeAction == action)
         }
 
         val hintY = layout.hintY
-        if (rebindingAction != null) {
+        if (rebinding.activeAction != null) {
             drawText(UiTheme.RebindingText, UiTheme.TextX, hintY, UiTheme.TextFontSize, UiTheme.green())
         } else {
             drawText("Click a binding to remap", UiTheme.TextX, hintY, UiTheme.TextFontSize, UiTheme.hintColor())
@@ -101,24 +91,9 @@ class SettingsScreen(
     }
 
     private fun drawRow(label: String, y: Int, highlighted: Boolean) {
-        if (highlighted) {
-            drawRect(ClickableRow.bounds(label, UiTheme.TextX, y), UiTheme.menuHighlight())
-        }
+        if (highlighted) drawRect(ClickableRow.bounds(label, UiTheme.TextX, y), UiTheme.menuHighlight())
         val textY = y + (UiTheme.MenuItemHeight - UiTheme.TextFontSize) / 2
         drawText(label, UiTheme.TextX, textY, UiTheme.TextFontSize, if (highlighted) UiTheme.green() else UiTheme.white())
-    }
-
-    private fun startRebinding(action: InputActionId) {
-        rebindingAction = action
-        releaseBeforeCapture = action
-        canCapture = false
-        inputSource.clearKeyboardCaptureQueue()
-    }
-
-    private fun stopRebinding() {
-        rebindingAction = null
-        releaseBeforeCapture = null
-        canCapture = false
     }
 
     private fun layout(): SettingsLayout {
@@ -132,10 +107,7 @@ class SettingsScreen(
             action to rowY
         }
 
-        y += UiTheme.TextLineHeight / 2
-        val hintY = y
-
-        return SettingsLayout(controlsHeaderY = controlsHeaderY, actionRows = actionRows, hintY = hintY)
+        return SettingsLayout(controlsHeaderY = controlsHeaderY, actionRows = actionRows, hintY = y + UiTheme.TextLineHeight / 2)
     }
 
     private inner class SettingsLayout(
@@ -153,8 +125,7 @@ class SettingsScreen(
                 SecondaryAction -> "Secondary"
                 else -> action.value
             }
-            val bindings = input.bindings(action).joinToString { it.control.displayName() }
-            return "$name: $bindings"
+            return "$name: ${input.bindings(action).joinToString { it.control.displayName() }}"
         }
     }
 }
