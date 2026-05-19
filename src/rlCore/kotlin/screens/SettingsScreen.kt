@@ -12,18 +12,21 @@ import org.bljw.kaylib.PrimaryAction
 import org.bljw.kaylib.SecondaryAction
 import org.bljw.kaylib.UiTheme
 import org.bljw.kaylib.displayName
+import org.bljw.kaylib.drawRect
+import org.bljw.kaylib.drawText
 import org.bljw.kaylib.input.InputActionId
 import org.bljw.kaylib.input.InputBinding
 import org.bljw.kaylib.input.InputSystem
 import org.bljw.kaylib.input.RaylibInputSource
-import org.bljw.kaylib.drawRect
-import org.bljw.kaylib.drawText
 import org.bljw.kaylib.measureText
 import org.bljw.kaylib.screenHeight
 import org.bljw.kaylib.screenWidth
 import org.bljw.kaylib.ui.ClickableRow
 
-class SettingsScreen {
+class SettingsScreen(
+    private val input: InputSystem,
+    private val inputSource: RaylibInputSource,
+) : Screen {
     private var rebindingAction: InputActionId? = null
     private var releaseBeforeCapture: InputActionId? = null
     private var canCapture = false
@@ -37,10 +40,7 @@ class SettingsScreen {
         SecondaryAction,
     )
 
-    fun update(
-        input: InputSystem,
-        inputSource: RaylibInputSource,
-    ): AppScreen? {
+    override fun update(input: InputSystem): AppScreen? {
         if (input.wasPressed(CancelAction)) {
             if (rebindingAction != null) {
                 stopRebinding()
@@ -49,12 +49,12 @@ class SettingsScreen {
             return AppScreen.MainMenu
         }
 
-        val layout = layout(input)
+        val layout = layout()
 
         if (rebindingAction == null) {
             for ((action, y) in layout.actionRows) {
-                if (ClickableRow.isClicked(layout.label(action, input), UiTheme.TextX, y)) {
-                    startRebinding(action, action, inputSource)
+                if (ClickableRow.isClicked(layout.label(action), UiTheme.TextX, y)) {
+                    startRebinding(action)
                     break
                 }
             }
@@ -62,10 +62,7 @@ class SettingsScreen {
             val action = rebindingAction!!
             if (canCapture) {
                 inputSource.captureNextControl()?.let { control ->
-                    input.replaceBinding(
-                        id = action,
-                        binding = InputBinding(control),
-                    )
+                    input.replaceBinding(id = action, binding = InputBinding(control))
                     stopRebinding()
                 }
             } else if (releaseBeforeCapture != null && !input.isDown(releaseBeforeCapture!!)) {
@@ -76,8 +73,8 @@ class SettingsScreen {
         return null
     }
 
-    fun draw(input: InputSystem) {
-        val layout = layout(input)
+    override fun draw() {
+        val layout = layout()
 
         val title = "Settings"
         val titleWidth = measureText(title, UiTheme.TitleFontSize)
@@ -86,7 +83,7 @@ class SettingsScreen {
         drawText("Controls", UiTheme.TextX, layout.controlsHeaderY, UiTheme.TextFontSize, UiTheme.hintColor())
 
         for ((action, y) in layout.actionRows) {
-            val label = layout.label(action, input)
+            val label = layout.label(action)
             val highlighted = rebindingAction == action
             drawRow(label, y, highlighted)
         }
@@ -103,11 +100,7 @@ class SettingsScreen {
         drawText(hint, (screenWidth() - hintWidth) / 2, screenHeight() - UiTheme.TextFontSize - 28, UiTheme.TextFontSize, UiTheme.hintColor())
     }
 
-    private fun drawRow(
-        label: String,
-        y: Int,
-        highlighted: Boolean,
-    ) {
+    private fun drawRow(label: String, y: Int, highlighted: Boolean) {
         if (highlighted) {
             drawRect(ClickableRow.bounds(label, UiTheme.TextX, y), UiTheme.menuHighlight())
         }
@@ -115,13 +108,9 @@ class SettingsScreen {
         drawText(label, UiTheme.TextX, textY, UiTheme.TextFontSize, if (highlighted) UiTheme.green() else UiTheme.white())
     }
 
-    private fun startRebinding(
-        action: InputActionId,
-        releaseAction: InputActionId,
-        inputSource: RaylibInputSource,
-    ) {
+    private fun startRebinding(action: InputActionId) {
         rebindingAction = action
-        releaseBeforeCapture = releaseAction
+        releaseBeforeCapture = action
         canCapture = false
         inputSource.clearKeyboardCaptureQueue()
     }
@@ -132,7 +121,7 @@ class SettingsScreen {
         canCapture = false
     }
 
-    private fun layout(input: InputSystem): SettingsLayout {
+    private fun layout(): SettingsLayout {
         var y = 112
         val controlsHeaderY = y
         y += UiTheme.TextLineHeight
@@ -146,19 +135,15 @@ class SettingsScreen {
         y += UiTheme.TextLineHeight / 2
         val hintY = y
 
-        return SettingsLayout(
-            controlsHeaderY = controlsHeaderY,
-            actionRows = actionRows,
-            hintY = hintY,
-        )
+        return SettingsLayout(controlsHeaderY = controlsHeaderY, actionRows = actionRows, hintY = hintY)
     }
 
-    private data class SettingsLayout(
+    private inner class SettingsLayout(
         val controlsHeaderY: Int,
         val actionRows: List<Pair<InputActionId, Int>>,
         val hintY: Int,
     ) {
-        fun label(action: InputActionId, input: InputSystem): String {
+        fun label(action: InputActionId): String {
             val name = when (action) {
                 MoveUpAction -> "Move Up"
                 MoveDownAction -> "Move Down"

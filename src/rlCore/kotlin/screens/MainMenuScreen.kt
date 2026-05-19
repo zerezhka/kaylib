@@ -10,7 +10,7 @@ import org.bljw.kaylib.drawText
 import org.bljw.kaylib.measureText
 import org.bljw.kaylib.screenWidth
 
-class MainMenuScreen {
+class MainMenuScreen : Screen {
     private val menu =
         VerticalMenu(
             items =
@@ -23,7 +23,7 @@ class MainMenuScreen {
             startY = 280,
         )
 
-    fun update(input: InputSystem): AppScreen? =
+    override fun update(input: InputSystem): AppScreen? =
         when (menu.update(input)) {
             0 -> AppScreen.Game
             1 -> AppScreen.Settings
@@ -31,7 +31,7 @@ class MainMenuScreen {
             else -> null
         }
 
-    fun draw() {
+    override fun draw() {
         val title = "Kaylib"
         val titleWidth = measureText(title, UiTheme.TitleFontSize)
         drawText(title, (screenWidth() - titleWidth) / 2, 120, UiTheme.TitleFontSize, UiTheme.white())

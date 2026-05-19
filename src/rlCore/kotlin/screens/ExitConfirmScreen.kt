@@ -13,7 +13,7 @@ import org.bljw.kaylib.measureText
 import org.bljw.kaylib.screenHeight
 import org.bljw.kaylib.screenWidth
 
-class ExitConfirmScreen {
+class ExitConfirmScreen(private val onQuit: () -> Unit) : Screen {
     private val menu =
         VerticalMenu(
             items =
@@ -25,10 +25,7 @@ class ExitConfirmScreen {
             startY = 320,
         )
 
-    fun update(
-        input: InputSystem,
-        onQuit: () -> Unit,
-    ): AppScreen? {
+    override fun update(input: InputSystem): AppScreen? {
         if (input.wasPressed(CancelAction)) {
             return AppScreen.MainMenu
         }
@@ -43,7 +40,7 @@ class ExitConfirmScreen {
         }
     }
 
-    fun draw() {
+    override fun draw() {
         drawRect(0, 0, screenWidth(), screenHeight(), UiTheme.overlay())
 
         val message = "Exit game?"

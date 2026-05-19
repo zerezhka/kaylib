@@ -12,46 +12,20 @@ import org.bljw.kaylib.MoveUpAction
 import org.bljw.kaylib.PrimaryAction
 import org.bljw.kaylib.SecondaryAction
 import org.bljw.kaylib.UiTheme
-import org.bljw.kaylib.input.InputSystem
-import org.bljw.kaylib.statusColor
-import org.bljw.kaylib.statusText
 import org.bljw.kaylib.drawText
+import org.bljw.kaylib.input.InputSystem
 import org.bljw.kaylib.measureText
 import org.bljw.kaylib.screenHeight
 import org.bljw.kaylib.screenWidth
+import org.bljw.kaylib.statusColor
+import org.bljw.kaylib.statusText
 import rl.Color
 
-class GameScreen {
-    fun update(input: InputSystem): AppScreen? =
-        if (input.wasPressed(CancelAction)) {
-            AppScreen.MainMenu
-        } else {
-            null
-        }
+class GameScreen(private val input: InputSystem) : Screen {
+    override fun update(input: InputSystem): AppScreen? =
+        if (input.wasPressed(CancelAction)) AppScreen.MainMenu else null
 
-    fun drawBackground(input: InputSystem): CValue<Color> {
-        var r = 0
-        var g = 0
-        var b = 0
-
-        if (input.isDown(MoveUpAction)) {
-            b += UiTheme.MovementColorIntensity
-        }
-        if (input.isDown(MoveDownAction)) {
-            r += UiTheme.MovementColorIntensity / 2
-            g += UiTheme.MovementColorIntensity / 4
-        }
-        if (input.isDown(MoveLeftAction)) {
-            r += UiTheme.MovementColorIntensity
-        }
-        if (input.isDown(MoveRightAction)) {
-            g += UiTheme.MovementColorIntensity
-        }
-
-        return UiTheme.movementBackground(r, g, b)
-    }
-
-    fun draw(input: InputSystem) {
+    override fun draw() {
         val title = "New Game"
         val titleWidth = measureText(title, UiTheme.TitleFontSize)
         drawText(title, (screenWidth() - titleWidth) / 2, 40, UiTheme.TitleFontSize, UiTheme.white())
@@ -77,5 +51,16 @@ class GameScreen {
         val hint = "Esc: Main Menu"
         val hintWidth = measureText(hint, UiTheme.TextFontSize)
         drawText(hint, (screenWidth() - hintWidth) / 2, screenHeight() - UiTheme.TextFontSize - 28, UiTheme.TextFontSize, UiTheme.hintColor())
+    }
+
+    fun background(): CValue<Color> {
+        var r = 0
+        var g = 0
+        var b = 0
+        if (input.isDown(MoveUpAction)) b += UiTheme.MovementColorIntensity
+        if (input.isDown(MoveDownAction)) { r += UiTheme.MovementColorIntensity / 2; g += UiTheme.MovementColorIntensity / 4 }
+        if (input.isDown(MoveLeftAction)) r += UiTheme.MovementColorIntensity
+        if (input.isDown(MoveRightAction)) g += UiTheme.MovementColorIntensity
+        return UiTheme.movementBackground(r, g, b)
     }
 }
