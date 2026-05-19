@@ -7,9 +7,9 @@ package org.bljw.kaylib.ui
 
 import kotlin.native.Platform
 import org.bljw.kaylib.UiTheme
-import rl.DrawText
-import rl.GetFPS
-import rl.GetFrameTime
+import org.bljw.kaylib.drawText
+import org.bljw.kaylib.fps
+import org.bljw.kaylib.frameTime
 
 private const val OverlayX = 8
 private const val OverlayY = 8
@@ -20,17 +20,11 @@ object DebugOverlay {
             return
         }
 
-        val fps = GetFPS()
-        val frameTimeMs = GetFrameTime() * 1000f
+        val fps = fps()
+        val frameTimeMs = frameTime() * 1000f
         val frameTimeRounded = (frameTimeMs * 10f).toInt() / 10f
 
-        DrawText("FPS: $fps", OverlayX, OverlayY, UiTheme.TextFontSize, UiTheme.hintColor())
-        DrawText(
-            "${frameTimeRounded} ms",
-            OverlayX,
-            OverlayY + UiTheme.TextLineHeight,
-            UiTheme.TextFontSize,
-            UiTheme.hintColor(),
-        )
+        drawText("FPS: $fps", OverlayX, OverlayY, UiTheme.TextFontSize, UiTheme.hintColor())
+        drawText("${frameTimeRounded} ms", OverlayX, OverlayY + UiTheme.TextLineHeight, UiTheme.TextFontSize, UiTheme.hintColor())
     }
 }

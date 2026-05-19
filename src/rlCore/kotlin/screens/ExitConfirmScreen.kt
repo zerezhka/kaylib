@@ -7,11 +7,11 @@ import org.bljw.kaylib.CancelAction
 import org.bljw.kaylib.UiTheme
 import org.bljw.kaylib.input.InputSystem
 import org.bljw.kaylib.ui.VerticalMenu
-import rl.DrawRectangle
-import rl.DrawText
-import rl.GetScreenHeight
-import rl.GetScreenWidth
-import rl.MeasureText
+import org.bljw.kaylib.drawRect
+import org.bljw.kaylib.drawText
+import org.bljw.kaylib.measureText
+import org.bljw.kaylib.screenHeight
+import org.bljw.kaylib.screenWidth
 
 class ExitConfirmScreen {
     private val menu =
@@ -44,17 +44,11 @@ class ExitConfirmScreen {
     }
 
     fun draw() {
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), UiTheme.overlay())
+        drawRect(0, 0, screenWidth(), screenHeight(), UiTheme.overlay())
 
         val message = "Exit game?"
-        val messageWidth = MeasureText(message, UiTheme.TitleFontSize)
-        DrawText(
-            message,
-            (GetScreenWidth() - messageWidth) / 2,
-            220,
-            UiTheme.TitleFontSize,
-            UiTheme.white(),
-        )
+        val messageWidth = measureText(message, UiTheme.TitleFontSize)
+        drawText(message, (screenWidth() - messageWidth) / 2, 220, UiTheme.TitleFontSize, UiTheme.white())
         menu.draw()
     }
 }

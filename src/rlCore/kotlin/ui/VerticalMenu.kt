@@ -10,12 +10,12 @@ import org.bljw.kaylib.MoveUpAction
 import org.bljw.kaylib.PrimaryAction
 import org.bljw.kaylib.UiTheme
 import org.bljw.kaylib.input.InputSystem
-import rl.CheckCollisionPointRec
+import org.bljw.kaylib.checkCollision
+import org.bljw.kaylib.drawRect
+import org.bljw.kaylib.drawText
+import org.bljw.kaylib.measureText
+import org.bljw.kaylib.mousePos
 import rl.Color
-import rl.DrawRectangleRec
-import rl.DrawText
-import rl.GetMousePosition
-import rl.MeasureText
 import rl.Rectangle
 
 class VerticalMenu(
@@ -54,27 +54,22 @@ class VerticalMenu(
             val isHovered = index == hoveredIndex
 
             if (isSelected || isHovered) {
-                DrawRectangleRec(bounds, UiTheme.menuHighlight())
+                drawRect(bounds, UiTheme.menuHighlight())
             }
 
-            val textWidth = MeasureText(label, UiTheme.TextFontSize)
+            val textWidth = measureText(label, UiTheme.TextFontSize)
             bounds.useContents {
                 val textX = centerX - textWidth / 2
                 val textY = y.toInt() + (height.toInt() - UiTheme.TextFontSize) / 2
-                val textColor =
-                    if (isSelected || isHovered) {
-                        UiTheme.green()
-                    } else {
-                        UiTheme.white()
-                    }
-                DrawText(label, textX, textY, UiTheme.TextFontSize, textColor)
+                val textColor = if (isSelected || isHovered) UiTheme.green() else UiTheme.white()
+                drawText(label, textX, textY, UiTheme.TextFontSize, textColor)
             }
         }
     }
 
     private fun itemBounds(index: Int): CValue<Rectangle> {
         val label = items[index]
-        val textWidth = MeasureText(label, UiTheme.TextFontSize)
+        val textWidth = measureText(label, UiTheme.TextFontSize)
         val width = textWidth + UiTheme.MenuItemPaddingX * 2
         val height = UiTheme.MenuItemHeight
         val x = centerX - width / 2f
@@ -89,9 +84,9 @@ class VerticalMenu(
     }
 
     private fun itemIndexAtMouse(): Int? {
-        val mouse = GetMousePosition()
+        val mouse = mousePos()
         return items.indices.firstOrNull { index ->
-            CheckCollisionPointRec(mouse, itemBounds(index))
+            checkCollision(mouse, itemBounds(index))
         }
     }
 }

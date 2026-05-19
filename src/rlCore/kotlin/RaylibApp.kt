@@ -8,21 +8,13 @@ import org.bljw.kaylib.screens.ExitConfirmScreen
 import org.bljw.kaylib.screens.GameScreen
 import org.bljw.kaylib.screens.MainMenuScreen
 import org.bljw.kaylib.screens.SettingsScreen
-import rl.BeginDrawing
-import rl.ClearBackground
-import rl.CloseWindow
-import rl.EndDrawing
-import rl.InitWindow
 import rl.KEY_NULL
 import rl.RAYLIB_VERSION
-import rl.SetExitKey
-import rl.SetTargetFPS
-import rl.WindowShouldClose
 
 fun runRaylibApp() {
-    InitWindow(UiTheme.WindowWidth, UiTheme.WindowHeight, "Raylib $RAYLIB_VERSION")
-    SetExitKey(KEY_NULL.toInt())
-    SetTargetFPS(UiTheme.TargetFps)
+    initWindow(UiTheme.WindowWidth, UiTheme.WindowHeight, "Raylib $RAYLIB_VERSION")
+    setExitKey(KEY_NULL.toInt())
+    setTargetFps(UiTheme.TargetFps)
 
     val inputSource = RaylibInputSource()
     val input = createInputSystem(inputSource)
@@ -36,7 +28,7 @@ fun runRaylibApp() {
     var shouldQuit = false
 
     try {
-        while (!WindowShouldClose() && !shouldQuit) {
+        while (!windowShouldClose() && !shouldQuit) {
             input.update()
 
             screen =
@@ -48,30 +40,30 @@ fun runRaylibApp() {
                         exitConfirmScreen.update(input) { shouldQuit = true } ?: screen
                 }
 
-            BeginDrawing()
+            beginDrawing()
             when (screen) {
                 AppScreen.MainMenu -> {
-                    ClearBackground(UiTheme.black())
+                    clearBackground(UiTheme.black())
                     mainMenuScreen.draw()
                 }
                 AppScreen.Game -> {
-                    ClearBackground(gameScreen.drawBackground(input))
+                    clearBackground(gameScreen.drawBackground(input))
                     gameScreen.draw(input)
                 }
                 AppScreen.Settings -> {
-                    ClearBackground(UiTheme.black())
+                    clearBackground(UiTheme.black())
                     settingsScreen.draw(input)
                 }
                 AppScreen.ExitConfirm -> {
-                    ClearBackground(UiTheme.black())
+                    clearBackground(UiTheme.black())
                     mainMenuScreen.draw()
                     exitConfirmScreen.draw()
                 }
             }
             DebugOverlay.drawIfEnabled()
-            EndDrawing()
+            endDrawing()
         }
     } finally {
-        CloseWindow()
+        closeWindow()
     }
 }

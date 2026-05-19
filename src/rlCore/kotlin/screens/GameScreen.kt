@@ -15,11 +15,11 @@ import org.bljw.kaylib.UiTheme
 import org.bljw.kaylib.input.InputSystem
 import org.bljw.kaylib.statusColor
 import org.bljw.kaylib.statusText
+import org.bljw.kaylib.drawText
+import org.bljw.kaylib.measureText
+import org.bljw.kaylib.screenHeight
+import org.bljw.kaylib.screenWidth
 import rl.Color
-import rl.DrawText
-import rl.GetScreenHeight
-import rl.GetScreenWidth
-import rl.MeasureText
 
 class GameScreen {
     fun update(input: InputSystem): AppScreen? =
@@ -53,29 +53,29 @@ class GameScreen {
 
     fun draw(input: InputSystem) {
         val title = "New Game"
-        val titleWidth = MeasureText(title, UiTheme.TitleFontSize)
-        DrawText(title, (GetScreenWidth() - titleWidth) / 2, 40, UiTheme.TitleFontSize, UiTheme.white())
+        val titleWidth = measureText(title, UiTheme.TitleFontSize)
+        drawText(title, (screenWidth() - titleWidth) / 2, 40, UiTheme.TitleFontSize, UiTheme.white())
 
         var y = 112
-        DrawText("WASD changes background color", UiTheme.TextX, y, UiTheme.TextFontSize, UiTheme.hintColor())
+        drawText("WASD changes background color", UiTheme.TextX, y, UiTheme.TextFontSize, UiTheme.hintColor())
         y += UiTheme.TextLineHeight
-        DrawText("Move: WASD or arrows", UiTheme.TextX, y, UiTheme.TextFontSize, UiTheme.hintColor())
+        drawText("Move: WASD or arrows", UiTheme.TextX, y, UiTheme.TextFontSize, UiTheme.hintColor())
         y += UiTheme.TextLineHeight * 2
 
-        DrawText("moveUp: ${input.state(MoveUpAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveUpAction))
+        drawText("moveUp: ${input.state(MoveUpAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveUpAction))
         y += UiTheme.TextLineHeight
-        DrawText("moveDown: ${input.state(MoveDownAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveDownAction))
+        drawText("moveDown: ${input.state(MoveDownAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveDownAction))
         y += UiTheme.TextLineHeight
-        DrawText("moveLeft: ${input.state(MoveLeftAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveLeftAction))
+        drawText("moveLeft: ${input.state(MoveLeftAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveLeftAction))
         y += UiTheme.TextLineHeight
-        DrawText("moveRight: ${input.state(MoveRightAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveRightAction))
+        drawText("moveRight: ${input.state(MoveRightAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(MoveRightAction))
         y += UiTheme.TextLineHeight
-        DrawText("primary: ${input.state(PrimaryAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(PrimaryAction))
+        drawText("primary: ${input.state(PrimaryAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(PrimaryAction))
         y += UiTheme.TextLineHeight
-        DrawText("secondary: ${input.state(SecondaryAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(SecondaryAction))
+        drawText("secondary: ${input.state(SecondaryAction).statusText()}", UiTheme.TextX, y, UiTheme.TextFontSize, input.statusColor(SecondaryAction))
 
         val hint = "Esc: Main Menu"
-        val hintWidth = MeasureText(hint, UiTheme.TextFontSize)
-        DrawText(hint, (GetScreenWidth() - hintWidth) / 2, GetScreenHeight() - UiTheme.TextFontSize - 28, UiTheme.TextFontSize, UiTheme.hintColor())
+        val hintWidth = measureText(hint, UiTheme.TextFontSize)
+        drawText(hint, (screenWidth() - hintWidth) / 2, screenHeight() - UiTheme.TextFontSize - 28, UiTheme.TextFontSize, UiTheme.hintColor())
     }
 }
